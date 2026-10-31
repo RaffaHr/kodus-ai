@@ -31,6 +31,8 @@ services:
                 condition: service_healthy
             db_mongodb:
                 condition: service_healthy
+            rabbitmq:
+                condition: service_healthy
         networks:
             - kodus-backend-services
 
@@ -49,6 +51,8 @@ services:
             db_postgres:
                 condition: service_healthy
             db_mongodb:
+                condition: service_healthy
+            rabbitmq:
                 condition: service_healthy
         networks:
             - kodus-backend-services
@@ -69,6 +73,8 @@ services:
                 condition: service_healthy
             db_mongodb:
                 condition: service_healthy
+            rabbitmq:
+                condition: service_healthy
         networks:
             - kodus-backend-services
 
@@ -88,6 +94,8 @@ services:
             db_postgres:
                 condition: service_healthy
             db_mongodb:
+                condition: service_healthy
+            rabbitmq:
                 condition: service_healthy
         networks:
             - kodus-backend-services
@@ -130,6 +138,31 @@ services:
             retries: 5
             start_period: 30s
 
+    rabbitmq:
+        # Kodus image: ships the delayed-message plugin and creates the
+        # kodus-ai vhost on boot (docker/rabbitMQ/init-definitions.sh).
+        image: ghcr.io/kodustech/kodus-rabbitmq:latest
+        container_name: kodus_rabbitmq_prod
+        hostname: rabbitmq
+        restart: unless-stopped
+        command: /usr/local/bin/init-definitions.sh
+        env_file:
+            - ${ENV_FILE:-.env.prod}
+        volumes:
+            - rabbitmqdata_prod:/var/lib/rabbitmq
+        networks:
+            - kodus-backend-services
+        healthcheck:
+            test: ['CMD', 'rabbitmq-diagnostics', '-q', 'check_running']
+            interval: 10s
+            timeout: 10s
+            retries: 10
+            start_period: 30s
+        ulimits:
+            nofile:
+                soft: 65536
+                hard: 65536
+
     db_mongodb:
         # Pinned, not floating. `mongo:8` resolves to a release that refuses
         # to start on Linux kernels 6.19+: MongoDB 8.0.21-8.0.29 and
@@ -170,6 +203,7 @@ services:
 volumes:
     pgdata_prod:
     mongodbdata_prod:
+    rabbitmqdata_prod:
 
 networks:
     kodus-backend-services:
