@@ -154,9 +154,9 @@ services:
             - kodus-backend-services
         healthcheck:
             test: ['CMD', 'rabbitmq-diagnostics', '-q', 'check_running']
-            interval: 10s
-            timeout: 10s
-            retries: 10
+            interval: 25s
+            timeout: 30s
+            retries: 30
             start_period: 30s
         ulimits:
             nofile:
