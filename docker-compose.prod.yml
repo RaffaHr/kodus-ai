@@ -102,7 +102,7 @@ services:
         env_file:
             - ${ENV_FILE:-.env.prod}
         ports:
-            - '3000:3000'
+            - '${WEB_PORT}:${WEB_PORT}'
         networks:
             - kodus-backend-services
 
